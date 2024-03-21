@@ -1,0 +1,15 @@
+enable
+conf t
+interface Loopback0
+ ip address 3.3.3.3 255.255.255.255
+ ipv6 ospf 10 area 0
+!
+interface GigabitEthernet3/0
+ ip address 10.0.0.245 255.255.255.252
+ ipv6 ospf 10 area 0
+ mpls ip
+ mpls label protocol ldp
+!
+ipv6 router ospf 10
+ router-id 10.10.3.3
+!
