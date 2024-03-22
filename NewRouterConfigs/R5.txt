@@ -1,20 +1,24 @@
 enable
 conf t
+ip cef
 interface Loopback0
  ip address 5.5.5.5 255.255.255.255
  ipv6 ospf 10 area 0
+ no shutdown
 !
 interface GigabitEthernet1/0
- ip address 10.0.0.250 255.255.255.252
+ ip address 10.0.0.10 255.255.255.252
  ipv6 ospf 10 area 0
  mpls ip
  mpls label protocol ldp
+ no shutdown
 !
 interface GigabitEthernet2/0
- ip address 10.0.0.253 255.255.255.252
+ ip address 10.0.0.17 255.255.255.252
  ipv6 ospf 10 area 0
  mpls ip
  mpls label protocol ldp
+ no shutdown
 !
 ipv6 router ospf 10
  router-id 10.10.5.5
