@@ -1,0 +1,47 @@
+Mar 25 16:17:30.501 HYPERVISOR: Release 0.2.23-amd64/Darwin (tag 2023010200)
+Mar 25 16:17:30.501 HYPERVISOR: Started on IP = 127.0.0.1, TCP port = 62410.
+Mar 25 16:17:30.507 HYPERVISOR: exec_cmd: hypervisor version 
+Mar 25 16:17:30.508 HYPERVISOR: exec_cmd: hypervisor working_dir /Users/mohamed/Downloads/V1testAdressage/project-files/dynamips 
+Mar 25 16:17:30.508 GENERAL: working_dir=/Users/mohamed/Downloads/V1testAdressage/project-files/dynamips
+Mar 25 16:17:30.508 HYPERVISOR: exec_cmd: hypervisor working_dir /Users/mohamed/Downloads/V1testAdressage/project-files/dynamips/48d2a03d-5fdd-480f-b3ff-eca0d1baea3e 
+Mar 25 16:17:30.508 GENERAL: working_dir=/Users/mohamed/Downloads/V1testAdressage/project-files/dynamips/48d2a03d-5fdd-480f-b3ff-eca0d1baea3e
+Mar 25 16:17:30.508 HYPERVISOR: exec_cmd: vm create PE1 3 c7200 
+Mar 25 16:17:30.508 VM: VM PE1 created.
+Mar 25 16:17:30.508 HYPERVISOR: exec_cmd: vm set_con_tcp_port PE1 5003 
+Mar 25 16:17:30.509 HYPERVISOR: exec_cmd: c7200 get_mac_addr PE1 
+Mar 25 16:17:30.509 HYPERVISOR: exec_cmd: vm get_status PE1 
+Mar 25 16:17:30.509 HYPERVISOR: exec_cmd: vm slot_add_binding PE1 0 0 C7200-IO-FE 
+Mar 25 16:17:30.509 HYPERVISOR: exec_cmd: vm set_disk0 PE1 0 
+Mar 25 16:17:30.510 HYPERVISOR: exec_cmd: vm set_ios PE1 /Users/mohamed/GNS3/images/IOS/c7200-advipservicesk9-mz.152-4.S5.image 
+Mar 25 16:17:30.510 HYPERVISOR: exec_cmd: c7200 set_mac_addr PE1 ca03.9813.0000 
+Mar 25 16:17:30.511 HYPERVISOR: exec_cmd: vm set_nvram PE1 512 
+Mar 25 16:17:30.511 HYPERVISOR: exec_cmd: vm set_ram PE1 512 
+Mar 25 16:17:30.511 HYPERVISOR: exec_cmd: vm get_status PE1 
+Mar 25 16:17:30.511 HYPERVISOR: exec_cmd: vm slot_add_binding PE1 1 0 PA-GE 
+Mar 25 16:17:30.511 HYPERVISOR: exec_cmd: vm get_status PE1 
+Mar 25 16:17:30.512 HYPERVISOR: exec_cmd: vm slot_add_binding PE1 2 0 PA-GE 
+Mar 25 16:17:30.512 HYPERVISOR: exec_cmd: vm get_status PE1 
+Mar 25 16:17:30.512 HYPERVISOR: exec_cmd: vm slot_add_binding PE1 3 0 PA-GE 
+Mar 25 16:17:31.036 HYPERVISOR: exec_cmd: nio create_udp udp-b62f1e60-dfd9-4440-94f1-3f03587d1b84 10004 127.0.0.1 10005 
+Mar 25 16:17:31.271 HYPERVISOR: exec_cmd: vm slot_add_nio_binding PE1 1 0 udp-b62f1e60-dfd9-4440-94f1-3f03587d1b84 
+Mar 25 16:17:31.272 HYPERVISOR: exec_cmd: vm get_status PE1 
+Mar 25 16:17:31.561 HYPERVISOR: exec_cmd: nio create_udp udp-b9b37b92-1dac-498a-ba41-77785771be88 10010 127.0.0.1 10011 
+Mar 25 16:17:31.563 HYPERVISOR: exec_cmd: vm slot_add_nio_binding PE1 2 0 udp-b9b37b92-1dac-498a-ba41-77785771be88 
+Mar 25 16:17:31.563 HYPERVISOR: exec_cmd: vm get_status PE1 
+Mar 25 16:17:31.601 HYPERVISOR: exec_cmd: nio create_udp udp-e39525f6-d437-4113-bd10-00f7b4e73b96 10014 127.0.0.1 10015 
+Mar 25 16:17:31.602 HYPERVISOR: exec_cmd: vm slot_add_nio_binding PE1 3 0 udp-e39525f6-d437-4113-bd10-00f7b4e73b96 
+Mar 25 16:17:31.602 HYPERVISOR: exec_cmd: vm get_status PE1 
+Mar 25 16:17:36.989 HYPERVISOR: exec_cmd: vm set_ghost_status PE1 2 
+Mar 25 16:17:36.989 HYPERVISOR: exec_cmd: vm set_ghost_file PE1 /Users/mohamed/Downloads/V1testAdressage/project-files/dynamips/c7200-advipservicesk9-mz.152-4.S5.image-512.ghost 
+Mar 25 16:17:36.990 HYPERVISOR: exec_cmd: vm get_status PE1 
+Mar 25 16:17:36.990 HYPERVISOR: exec_cmd: vm set_config PE1 configs/i3_startup-config.cfg configs/i3_private-config.cfg 
+Mar 25 16:17:36.990 HYPERVISOR: exec_cmd: vm start PE1 
+Mar 25 16:18:07.234 HYPERVISOR: exec_cmd: vm extract_config PE1 
+Mar 25 16:19:07.236 HYPERVISOR: exec_cmd: vm extract_config PE1 
+Mar 25 16:28:37.311 HYPERVISOR: exec_cmd: vm extract_config PE1 
+Mar 25 16:40:07.350 HYPERVISOR: exec_cmd: vm extract_config PE1 
+Mar 25 16:45:07.376 HYPERVISOR: exec_cmd: vm extract_config PE1 
+Mar 25 16:45:36.462 HYPERVISOR: exec_cmd: vm get_status PE1 
+Mar 25 16:45:36.466 HYPERVISOR: exec_cmd: vm stop PE1 
+Mar 25 16:45:36.583 VM: VM PE1 shutdown.
+Mar 25 16:45:36.584 HYPERVISOR: exec_cmd: vm extract_config PE1 
