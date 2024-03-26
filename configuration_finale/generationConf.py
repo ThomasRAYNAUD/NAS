@@ -172,11 +172,15 @@ for router in routers:
     id = router["id"]
     As = router["as"]
     
-    for as_dict in asList:
-        if as_dict['id']==As:
-            As_type=as_dict['type']
-
-    print(As_type)
+    if router["type"]=="client":
+        router_type="client"
+        As_type="client"
+    elif router["type"]=="client_edge":
+        router_type="client_edge"
+        As_type="client"
+    elif router["type"]=="provider":
+        router_type="provider_edge"
+        As_type="provider"
 
     #Creation du fichier de configuration du routeur sous la même forme que les fichiers de configuration de GNS3
     if not os.path.exists(outputPath):
