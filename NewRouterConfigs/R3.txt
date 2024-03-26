@@ -26,3 +26,14 @@ interface GigabitEthernet3/0
 router ospf 10
  router-id 10.10.3.3
 !
+router bgp 1
+ bgp router-id 10.10.1O.3
+bgp log-neighbor-changes
+ neighbor 6.6.6.6 remote-as 1
+ neighbor 6.6.6.6 update-source Loopback0
+!
+address-family vpnv4
+ neighbor 6.6.6.6 activate
+ neighbor 6.6.6.6 send-community both
+exit-address-family
+!
