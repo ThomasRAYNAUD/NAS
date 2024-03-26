@@ -1,0 +1,99 @@
+Router#sh run
+Building configuration...
+
+Current configuration : 1043 bytes
+!
+! Last configuration change at 16:13:38 UTC Tue Mar 26 2024
+!
+version 15.2
+service timestamps debug datetime msec
+service timestamps log datetime msec
+!
+hostname Router
+!
+boot-start-marker
+boot-end-marker
+!
+!
+!
+no aaa new-model
+ip cef
+!
+!
+!
+!
+!
+!         
+no ipv6 cef
+!
+!
+multilink bundle-name authenticated
+!
+!
+!
+!
+!
+!
+!
+!
+!
+! 
+!
+!
+!
+!
+!
+!
+!
+!
+!         
+!
+!
+interface Loopback1
+ ip address 8.8.8.8 255.255.255.255
+!
+interface FastEthernet0/0
+ no ip address
+ duplex full
+!
+interface GigabitEthernet1/0
+ ip address 101.0.0.6 255.255.255.252
+ negotiation auto
+!
+interface GigabitEthernet2/0
+ no ip address
+ shutdown
+ negotiation auto
+!
+router bgp 65002
+ bgp router-id 10.10.10.8
+ bgp log-neighbor-changes
+ neighbor 101.0.0.5 remote-as 65000
+ !        
+ address-family ipv4
+  network 8.8.8.8 mask 255.255.255.255
+  neighbor 101.0.0.5 activate
+  neighbor 101.0.0.5 allowas-in
+ exit-address-family
+!
+ip forward-protocol nd
+!
+!
+no ip http server
+no ip http secure-server
+!
+!
+!
+!
+control-plane
+!
+!
+line con 0
+ stopbits 1
+line aux 0
+ stopbits 1
+line vty 0 4
+ login
+!
+!
+end
