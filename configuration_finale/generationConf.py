@@ -127,7 +127,8 @@ def as_links(router_links, as_dict, router_dict):
 #LECTURE DE L'INTENT FILE
 
 #Récupération de l'intent file
-f = open("/home/hipp/Documents/TC/NAS/NAS/configuration_finale/intentFiles/intentFileTestNetwork.json", "r")
+
+f = open("configuration_finale/intentFiles/intentFileTestNetwork.json", "r")
 intentFile = json.load(f)
 f.close()
 
