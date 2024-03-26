@@ -161,7 +161,7 @@ for as_dict in asLinks:
                 subnet = as_infos['subnets'].pop(0)
                 ip_by_links[link]=(get_subnet_ips(subnet),get_subnet_mask(subnet))
                     
-
+print(asLinks)
 #Constantes
 ospfProcess = str(intentFile["constantes"]["ospfPid"])
 
@@ -172,18 +172,27 @@ for router in routers:
     id = router["id"]
     As = router["as"]
     
+    for as_dict in asList:
+        if as_dict['id']==As:
+            As_type=as_dict['type']
+
+    print(As_type)
+
     #Creation du fichier de configuration du routeur sous la même forme que les fichiers de configuration de GNS3
     if not os.path.exists(outputPath):
         os.makedirs(outputPath)
     res = open(f"{outputPath}/R{id}.txt", "w")
 
-    res.write("enable\nconf t\nip cef\n")
+    res.write("enable\nconf t\n")
+
+    if As_type=='provider':
+        res.write('ip cef\n')
 
     #Interface de Loopback
     res.write("interface Loopback0\n"
               f" ip address {id}.{id}.{id}.{id} 255.255.255.255\n")
     
-    res.write(f" ipv6 ospf {ospfProcess} area 0\n")
+    res.write(f" ip ospf {ospfProcess} area 0\n")
     res.write(f" no shutdown\n")
     res.write("!\n")
 
@@ -200,14 +209,14 @@ for router in routers:
 
         res.write(f" ip address {ip_address} {ip_mask}\n")
         
-        res.write(f" ipv6 ospf {ospfProcess} area 0\n")
-
-        res.write(f" mpls ip\n mpls label protocol ldp\n")
+        res.write(f" ip ospf {ospfProcess} area 0\n")
+        if (As_type == 'provider' and adj['protocol-type']=='igp'):
+            res.write(f" mpls ip\n mpls label protocol ldp\n")
         res.write(f" no shutdown\n")
         res.write("!\n")
              
 
-    res.write(f"ipv6 router ospf {ospfProcess}\n"
+    res.write(f"router ospf {ospfProcess}\n"
                 f" router-id 10.10.{id}.{id}\n")    
                 
     res.write("!\n")
