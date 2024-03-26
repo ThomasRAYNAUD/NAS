@@ -39,6 +39,7 @@
     "routers": [
     {
         "id":1,
+        "type":"client",
         "as":4,
         "adj":[
             {
@@ -51,6 +52,7 @@
     {
         "id":2,
         "as":2,
+        "type":"client",
         "adj":[
             {
                 "neighbor":3,
@@ -63,6 +65,7 @@
     {
         "id":3,
         "as":1,
+        "type":"provider_edge",
         "adj":[
             {
                 "neighbor":2,
@@ -84,6 +87,7 @@
     {
         "id":4,
         "as":1,
+        "type":"provider",
         "adj":[
             {
                 "neighbor":3,
@@ -100,6 +104,7 @@
     {
         "id":5,
         "as":1,
+        "type":"provider",
         "adj":[
             {
                 "neighbor":4,
@@ -116,6 +121,7 @@
     {
         "id":6,
         "as":1,
+        "type":"provider_edge",
         "adj":[
             {
                 "neighbor":5,
@@ -137,6 +143,7 @@
     {
         "id":7,
         "as":4,
+        "type":"client",
         "adj":[
             {
                 "neighbor":6,
@@ -148,6 +155,7 @@
     {
         "id":8,
         "as":3,
+        "type":"client",
         "adj":[
             {
                 "neighbor":6,
