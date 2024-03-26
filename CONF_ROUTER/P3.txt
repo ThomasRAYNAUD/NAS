@@ -1,0 +1,94 @@
+Router#sh run
+Building configuration...
+
+Current configuration : 860 bytes
+!
+version 15.2
+service timestamps debug datetime msec
+service timestamps log datetime msec
+!
+hostname Router
+!
+boot-start-marker
+boot-end-marker
+!
+!
+!
+no aaa new-model
+ip cef
+!
+!
+!
+!
+!
+!
+no ipv6 cef
+!         
+!
+multilink bundle-name authenticated
+!
+!
+!
+!
+!
+!
+!
+!
+!
+! 
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!         
+interface Loopback0
+ ip address 1.1.1.3 255.255.255.255
+ ip ospf 1 area 0
+!
+interface FastEthernet0/0
+ no ip address
+ shutdown
+ duplex full
+!
+interface GigabitEthernet1/0
+ ip address 10.0.0.250 255.255.255.252
+ ip ospf 1 area 0
+ negotiation auto
+ mpls ip
+!
+interface GigabitEthernet2/0
+ ip address 10.0.0.253 255.255.255.252
+ ip ospf 1 area 0
+ negotiation auto
+ mpls ip
+!
+router ospf 1
+ router-id 1.0.0.3
+!
+ip forward-protocol nd
+!
+!
+no ip http server
+no ip http secure-server
+!
+!
+!
+!
+control-plane
+!
+!
+line con 0
+ stopbits 1
+line aux 0
+ stopbits 1
+line vty 0 4
+ login
+!
+!
+end
