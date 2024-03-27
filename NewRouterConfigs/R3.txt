@@ -45,3 +45,13 @@ address-family vpnv4
  neighbor 6.6.6.6 send-community both
 exit-address-family
 !
+address-family ipv4 vrf red
+neighbor 10.0.0.9 remote-as 2
+neighbor 10.0.0.9 activate
+exit-address-family
+!
+address-family ipv4 vrf green
+neighbor 10.0.0.25 remote-as 4
+neighbor 10.0.0.25 activate
+exit-address-family
+!
