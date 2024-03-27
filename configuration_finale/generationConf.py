@@ -179,10 +179,12 @@ for router in routers:
     elif router["type"]=="client_edge":
         router_type="client_edge"
         As_type="client"
-    elif router["type"]=="provider":
+    elif router["type"]=="provider_edge":
         router_type="provider_edge"
         As_type="provider"
-
+    elif router["type"]=="provider":
+        router_type="provider"
+        As_type="provider"
     #Creation du fichier de configuration du routeur sous la même forme que les fichiers de configuration de GNS3
     if not os.path.exists(outputPath):
         os.makedirs(outputPath)
@@ -210,10 +212,17 @@ for router in routers:
 
         #Récupération de l'IP et du masque
         ip_address,ip_mask = recup_ip_masque(ip_by_links,id,(id,neighbor))
-        
 
-        res.write(f" ip address {ip_address} {ip_mask}\n")
-        
+        # Ecrire la VRF sur les liens EGP
+      
+
+    
+        if As_type == 'provider' and adj['protocol-type']=='egp':
+            neighbor = adj['neighbor']
+            neighbor_as = routers[neighbor-1]['as']
+            color = asList[neighbor_as-1]['color'] 
+            res.write(" ip vrf forwarding " + color + "\n")
+                
         res.write(f" ip ospf {ospfProcess} area 0\n")
         if (As_type == 'provider' and adj['protocol-type']=='igp'):
             res.write(f" mpls ip\n mpls label protocol ldp\n")
