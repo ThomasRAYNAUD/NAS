@@ -218,6 +218,7 @@ for router in routers:
     
     if As_type=='provider':
         res.write('ip cef\n')
+    if router_type=='provider_edge':
         res.write(vrf(asList, constantes))
         
         
