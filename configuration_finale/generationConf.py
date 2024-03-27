@@ -263,7 +263,7 @@ for router in routers:
     if As_type=="client":
         res.write(f"!\n")
         res.write(f"router bgp {As}\n")
-        res.write(f" bgp router-id {id}.{id}.{id}.{id}\n")
+        res.write(f" bgp router-id 10.10.10.{id}\n")
         egp_neighbors = [adj['neighbor'] for adj in router['adj'] if adj['protocol-type'] == 'egp']
         # récupe des voisins de l'egp
         for neighbor in egp_neighbors:
