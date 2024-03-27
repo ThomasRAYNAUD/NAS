@@ -51,6 +51,11 @@
                 "neighbor":3,
                 "interface":"GigabitEthernet1/0",
                 "protocol-type": "egp"
+            },
+            {
+                "neighbor":11,
+                "interface":"GigabitEthernet2/0",
+                "protocol-type": "igp"
             }
         ]
     },
@@ -64,6 +69,11 @@
                 "interface":"GigabitEthernet1/0",
                 "protocol-type": "egp"
 
+            },
+            {
+                "neighbor":12,
+                "interface":"GigabitEthernet2/0",
+                "protocol-type": "igp"
             }
         ]
     },
@@ -154,6 +164,11 @@
                 "neighbor":6,
                 "interface":"GigabitEthernet1/0",
                 "protocol-type": "egp"
+            },
+            {
+                "neighbor":10,
+                "interface":"GigabitEthernet2/0",
+                "protocol-type": "igp"
             }
         ]
     },
@@ -181,6 +196,42 @@
         "adj":[
             {
                 "neighbor":8,
+                "interface":"GigabitEthernet1/0",
+                "protocol-type": "igp"
+            }
+        ]
+    },
+    {
+        "id":10,
+        "as":4,
+        "type":"client",
+        "adj":[
+            {
+                "neighbor":7,
+                "interface":"GigabitEthernet1/0",
+                "protocol-type": "igp"
+            }
+        ]
+    },
+    {
+        "id":11,
+        "as":4,
+        "type":"client",
+        "adj":[
+            {
+                "neighbor":1,
+                "interface":"GigabitEthernet1/0",
+                "protocol-type": "igp"
+            }
+        ]
+    },
+    {
+        "id":12,
+        "as":2,
+        "type":"client",
+        "adj":[
+            {
+                "neighbor":2,
                 "interface":"GigabitEthernet1/0",
                 "protocol-type": "igp"
             }
