@@ -1,7 +1,11 @@
 {   
     "constantes":{
         "ospfPid": 10,
-        "egp": "bgp"
+        "egp": "bgp",
+        "route-target-red": "1:3",
+        "route-dist-red": "1:2",
+        "route-target-green": "2:3",
+        "route-dist-green": "2:2"
     },
     "as":[
         {
@@ -9,7 +13,8 @@
             "network_prefix": "10.0.0.0",
             "network_mask":"255.255.255.0",
             "subnet_mask":"255.255.255.252",
-            "type":"provider"
+            "type":"provider",
+            "color":""
         },
         {
             "id":2,

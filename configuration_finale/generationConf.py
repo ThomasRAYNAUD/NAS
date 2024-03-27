@@ -1,7 +1,9 @@
-import json, os
-
-
+import json
+import os
 import ipaddress
+
+
+
 
 def recup_ip_masque(dico, id, link_tuple):
     # Vérifier si le tuple de liens existe dans le dictionnaire
@@ -75,7 +77,7 @@ def as_links(router_links, as_dict, router_dict):
     as_links_list = []
 
     for link in router_links:
-        router1, router2 = link
+        router1, router2 = link 
 
         # Recherche des AS correspondant à chaque routeur
         as_router1 = None
@@ -122,6 +124,28 @@ def as_links(router_links, as_dict, router_dict):
     return as_links_list
 
 
+def vrf(asList, constantes):
+    colors=[]
+    string=""
+    for num_as in asList:
+        if num_as["color"] and num_as["color"] not in colors:
+            colors.append(num_as["color"])
+                
+    for color in colors :
+        string += (f"ip vrf {color}\n rd {constantes[f'route-dist-{color}']}\n"
+            f" route-target export {constantes[f'route-target-{color}']}\n"
+            f" route-target import {constantes[f'route-target-{color}']}\n")
+        
+    return string
+        
+
+
+        
+
+            
+         
+        
+            
 
 
 #LECTURE DE L'INTENT FILE
@@ -135,8 +159,9 @@ f.close()
 outputPath = "./NewRouterConfigs"
 
 #Routeurs
-routers = intentFile["routers"]
+routers = intentFile["routers"] 
 nbRouter = len(routers)
+constantes = intentFile["constantes"]
 
 #AS
 asList = intentFile["as"]
@@ -161,18 +186,15 @@ for as_dict in asLinks:
             if as_infos['id']==as_id:
                 subnet = as_infos['subnets'].pop(0)
                 ip_by_links[link]=(get_subnet_ips(subnet),get_subnet_mask(subnet))
-                    
-print(asLinks)
+
 #Constantes
 ospfProcess = str(intentFile["constantes"]["ospfPid"])
 
 #Ecriture de la configuration pour chaque routeur
 for router in routers:
-    
     #Recuperation des infos du routeur
     id = router["id"]
     As = router["as"]
-    
     if router["type"]=="client":
         router_type="client"
         As_type="client"
@@ -186,48 +208,88 @@ for router in routers:
         router_type="provider"
         As_type="provider"
 
-    print(router_type)
     #Creation du fichier de configuration du routeur sous la même forme que les fichiers de configuration de GNS3
     if not os.path.exists(outputPath):
         os.makedirs(outputPath)
     res = open(f"{outputPath}/R{id}.txt", "w")
+    # si le fichier ne s'est pas ouvert
 
     res.write("enable\nconf t\n")
-
+    
     if As_type=='provider':
         res.write('ip cef\n')
+        res.write(vrf(asList, constantes))
+        
+        
+        
 
     #Interface de Loopback
     res.write("interface Loopback0\n"
               f" ip address {id}.{id}.{id}.{id} 255.255.255.255\n")
-    
+    #ospf sur tous les routeurs
     res.write(f" ip ospf {ospfProcess} area 0\n")
     res.write(f" no shutdown\n")
     res.write("!\n")
-
-    #Interfaces
+    
+    # configuration des interfaces en suivant les adjacences du json
     for adj in router["adj"]:
-
         neighbor = adj['neighbor']
-
         res.write(f"interface {adj['interface']}\n")
 
         #Récupération de l'IP et du masque
         ip_address,ip_mask = recup_ip_masque(ip_by_links,id,(id,neighbor))
-        
 
-        res.write(f" ip address {ip_address} {ip_mask}\n")
-        
-        res.write(f" ip ospf {ospfProcess} area 0\n")
+        # Ecrire la VRF sur les liens EGP
+      
+
+    
+        if As_type == 'provider' and adj['protocol-type']=='egp':
+            neighbor = adj['neighbor']
+            neighbor_as = routers[neighbor-1]['as']
+            color = asList[neighbor_as-1]['color'] 
+            res.write(" ip vrf forwarding " + color + "\n")
+                
+        if adj['protocol-type']=='igp':
+            res.write(f" ip ospf {ospfProcess} area 0\n")
         if (As_type == 'provider' and adj['protocol-type']=='igp'):
             res.write(f" mpls ip\n mpls label protocol ldp\n")
         res.write(f" no shutdown\n")
+        res.write(f" ip address {ip_address} {ip_mask}\n")
         res.write("!\n")
-             
+
 
     res.write(f"router ospf {ospfProcess}\n"
                 f" router-id 10.10.{id}.{id}\n")    
-                
+    
+    if As_type=="client":
+        res.write(f"!\n")
+        res.write(f"router bgp {As}\n")
+        res.write(f" bgp router-id 10.10.10.{id}\n")
+        egp_neighbors = [adj['neighbor'] for adj in router['adj'] if adj['protocol-type'] == 'egp']
+        # récupe des voisins de l'egp
+        for neighbor in egp_neighbors:
+            for router in routers:
+                if router['id'] == neighbor:
+                    ip_address_voisin,ip_mask = recup_ip_masque(ip_by_links,neighbor,(neighbor,id))
+                    res.write(f' neighbor {ip_address_voisin} remote-as {router["as"]}\n')
+                    res.write(f'!\n')
+                    res.write(f' address-family ipv4\n')
+                    res.write(f' neighbor {ip_address_voisin} activate\n')
+                    # parmis tous les routeurs, si un autre customer est dans la même as que ce routeur
+                    for router in routers:
+                        if router['type'] == "client_edge" and router['as'] == As and router['id'] != id:
+                            res.write(f' neighbor {ip_address_voisin} allowas-in\n')
+                            break
+                    res.write(f' exit-address-family\n')
+        res.write(f"address-familly ipv4\n")
+        res.write(f" network {id+10}.{id+10}.{id+10}.0 mask 255.255.255.0\n")
+        res.write(f"!\n")
+        res.write(f"interface loopback1\n")
+        res.write(f" ip address {id+10}.{id+10}.{id+10}.1 255.255.255.0\n")
+        res.write(f" no shutdown\n")
+        res.write(f"!\n")
+
+        
     res.write("!\n")
 
     #Configuration BGP
@@ -279,5 +341,5 @@ for router in routers:
 
 
     res.close()
-
+    
     print(f"Configuration du routeur {id} generee !")
