@@ -20,11 +20,11 @@ router bgp 4
  neighbor 10.0.0.13 activate
  neighbor 10.0.0.13 allowas-in
  exit-address-family
-address-familly ipv4
- network 17.17.17.0 mask 255.255.255.0
+address-family ipv4
+ network 107.107.107.0 mask 255.255.255.0
 !
 interface loopback1
- ip address 17.17.17.1 255.255.255.0
+ ip address 107.107.107.1 255.255.255.0
  no shutdown
 !
 !

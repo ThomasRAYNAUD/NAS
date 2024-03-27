@@ -166,6 +166,23 @@
                 "neighbor":6,
                 "interface":"GigabitEthernet1/0",
                 "protocol-type": "egp"
+            },
+            {
+                "neighbor":9,
+                "interface":"GigabitEthernet2/0",
+                "protocol-type": "igp"
+            }
+        ]
+    },
+    {
+        "id":9,
+        "as":3,
+        "type":"client",
+        "adj":[
+            {
+                "neighbor":8,
+                "interface":"GigabitEthernet1/0",
+                "protocol-type": "igp"
             }
         ]
     }

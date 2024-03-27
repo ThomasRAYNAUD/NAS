@@ -35,7 +35,7 @@ router ospf 10
  router-id 10.10.3.3
 !
 router bgp 1
- bgp router-id 10.10.1O.3
+ bgp router-id 10.10.10.3
 bgp log-neighbor-changes
  neighbor 6.6.6.6 remote-as 1
  neighbor 6.6.6.6 update-source Loopback0

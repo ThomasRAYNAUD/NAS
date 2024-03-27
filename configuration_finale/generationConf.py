@@ -261,7 +261,7 @@ for router in routers:
     res.write(f"router ospf {ospfProcess}\n"
                 f" router-id 10.10.{id}.{id}\n")    
     
-    if As_type=="client":
+    if router_type=="client_edge":
         res.write(f"!\n")
         res.write(f"router bgp {As}\n")
         res.write(f" bgp router-id 10.10.10.{id}\n")
@@ -281,7 +281,7 @@ for router in routers:
                             res.write(f' neighbor {ip_address_voisin} allowas-in\n')
                             break
                     res.write(f' exit-address-family\n')
-        res.write(f"address-familly ipv4\n")
+        res.write(f"address-family ipv4\n")
         res.write(f" network {id+100}.{id+100}.{id+100}.0 mask 255.255.255.0\n")
         res.write(f"!\n")
         res.write(f"interface loopback1\n")
@@ -295,7 +295,7 @@ for router in routers:
     #Configuration BGP
     if router_type == "provider_edge":
         res.write(f"router bgp {As}\n")
-        res.write(f" bgp router-id 10.10.1O.{id}\n")
+        res.write(f" bgp router-id 10.10.10.{id}\n")
         res.write("bgp log-neighbor-changes\n")
         for routeuur in routers:
             if routeuur["as"]==As and routeuur["type"]=="provider_edge" and routeuur["id"]!=id:
