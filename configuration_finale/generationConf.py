@@ -133,7 +133,8 @@ def vrf(asList, constantes):
             colors.append(num_as["color"])
                 
     for color in colors :
-        string += (f"ip vrf {color[0]}\n rd {constantes[f'route-dist-{color}']}\n"
+        print(color)
+        string += (f"ip vrf {color}\n rd {constantes[f'route-dist-{color}']}\n"
             f" route-target export {constantes[f'route-target-{color}']}\n"
             f" route-target import {constantes[f'route-target-{color}']}\n")
         
