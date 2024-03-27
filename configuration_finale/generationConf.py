@@ -3,6 +3,9 @@ import json, os
 
 import ipaddress
 
+
+
+
 def recup_ip_masque(dico, id, link_tuple):
     # Vérifier si le tuple de liens existe dans le dictionnaire
     if link_tuple in dico:
@@ -122,6 +125,28 @@ def as_links(router_links, as_dict, router_dict):
     return as_links_list
 
 
+def vrf(asList, constantes):
+    colors=[]
+    string=""
+    for num_as in asList:
+        if num_as["color"] and num_as["color"] not in colors:
+            colors.append(num_as["color"])
+                
+    for color in colors :
+        string += (f"ip vrf {color[0]}\n rd {constantes[f'route-dist-{color}']}\n"
+            f" route-target export {constantes[f'route-target-{color}']}\n"
+            f" route-target import {constantes[f'route-target-{color}']}\n")
+        
+    return string
+        
+
+
+        
+
+            
+         
+        
+            
 
 
 #LECTURE DE L'INTENT FILE
@@ -137,6 +162,7 @@ outputPath = "./NewRouterConfigs"
 #Routeurs
 routers = intentFile["routers"]
 nbRouter = len(routers)
+constantes = intentFile["constantes"]
 
 #AS
 asList = intentFile["as"]
@@ -192,6 +218,10 @@ for router in routers:
 
     if As_type=='provider':
         res.write('ip cef\n')
+        res.write(vrf(asList, constantes))
+        
+        
+        
 
     #Interface de Loopback
     res.write("interface Loopback0\n"
