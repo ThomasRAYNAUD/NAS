@@ -249,7 +249,8 @@ for router in routers:
             color = asList[neighbor_as-1]['color'] 
             res.write(" ip vrf forwarding " + color + "\n")
                 
-        res.write(f" ip ospf {ospfProcess} area 0\n")
+        if adj['protocol-type']=='igp':
+            res.write(f" ip ospf {ospfProcess} area 0\n")
         if (As_type == 'provider' and adj['protocol-type']=='igp'):
             res.write(f" mpls ip\n mpls label protocol ldp\n")
         res.write(f" no shutdown\n")

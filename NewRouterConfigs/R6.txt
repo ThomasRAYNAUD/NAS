@@ -23,13 +23,11 @@ interface GigabitEthernet1/0
 !
 interface GigabitEthernet2/0
  ip vrf forwarding green
- ip ospf 10 area 0
  no shutdown
  ip address 10.0.0.13 255.255.255.252
 !
 interface GigabitEthernet3/0
  ip vrf forwarding red
- ip ospf 10 area 0
  no shutdown
  ip address 10.0.0.5 255.255.255.252
 !

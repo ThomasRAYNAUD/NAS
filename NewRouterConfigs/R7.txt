@@ -6,7 +6,6 @@ interface Loopback0
  no shutdown
 !
 interface GigabitEthernet1/0
- ip ospf 10 area 0
  no shutdown
  ip address 10.0.0.14 255.255.255.252
 !
@@ -14,7 +13,7 @@ router ospf 10
  router-id 10.10.7.7
 !
 router bgp 4
- bgp router-id 7.7.7.7
+ bgp router-id 10.10.10.7
  neighbor 10.0.0.13 remote-as 1
 !
  address-family ipv4
