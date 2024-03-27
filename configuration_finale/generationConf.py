@@ -3,6 +3,9 @@ import json, os
 
 import ipaddress
 
+
+
+
 def recup_ip_masque(dico, id, link_tuple):
     # Vérifier si le tuple de liens existe dans le dictionnaire
     if link_tuple in dico:
@@ -122,6 +125,28 @@ def as_links(router_links, as_dict, router_dict):
     return as_links_list
 
 
+def vrf(asList, constantes):
+    colors=[]
+    string=""
+    for num_as in asList:
+        if num_as["color"] and num_as["color"] not in colors:
+            colors.append(num_as["color"])
+                
+    for color in colors :
+        string += (f"ip vrf {color}\n rd {constantes[f'route-dist-{color}']}\n"
+            f" route-target export {constantes[f'route-target-{color}']}\n"
+            f" route-target import {constantes[f'route-target-{color}']}\n")
+        
+    return string
+        
+
+
+        
+
+            
+         
+        
+            
 
 
 #LECTURE DE L'INTENT FILE
@@ -137,6 +162,7 @@ outputPath = "./NewRouterConfigs"
 #Routeurs
 routers = intentFile["routers"]
 nbRouter = len(routers)
+constantes = intentFile["constantes"]
 
 #AS
 asList = intentFile["as"]
@@ -185,6 +211,8 @@ for router in routers:
     elif router["type"]=="provider":
         router_type="provider"
         As_type="provider"
+
+    print(router_type)
     #Creation du fichier de configuration du routeur sous la même forme que les fichiers de configuration de GNS3
     if not os.path.exists(outputPath):
         os.makedirs(outputPath)
@@ -194,6 +222,10 @@ for router in routers:
 
     if As_type=='provider':
         res.write('ip cef\n')
+        res.write(vrf(asList, constantes))
+        
+        
+        
 
     #Interface de Loopback
     res.write("interface Loopback0\n"
@@ -234,7 +266,33 @@ for router in routers:
                 f" router-id 10.10.{id}.{id}\n")    
                 
     res.write("!\n")
+
+    #Configuration BGP
+    if router_type == "provider_edge":
+        res.write(f"router bgp {As}\n")
+        res.write(f" bgp router-id 10.10.1O.{id}\n")
+        res.write("bgp log-neighbor-changes\n")
+        for routeuur in routers:
+            if routeuur["as"]==As and routeuur["type"]=="provider_edge" and routeuur["id"]!=id:
+                res.write(f" neighbor {routeuur['id']}.{routeuur['id']}.{routeuur['id']}.{routeuur['id']} remote-as {As}\n")
+                res.write(f" neighbor {routeuur['id']}.{routeuur['id']}.{routeuur['id']}.{routeuur['id']} update-source Loopback0\n")
+        
+        res.write("!\n")
+        res.write("address-family vpnv4\n")
+        
+        for routeuur in routers:
+            if routeuur["as"]==As and routeuur["type"]=="provider_edge" and routeuur["id"]!=id:
+                res.write(f" neighbor {routeuur['id']}.{routeuur['id']}.{routeuur['id']}.{routeuur['id']} activate\n")
+                res.write(f" neighbor {routeuur['id']}.{routeuur['id']}.{routeuur['id']}.{routeuur['id']} send-community both\n")
+        res.write("exit-address-family\n")
+        res.write("!\n")
+
+
     
+    
+
+
+
     res.close()
 
     print(f"Configuration du routeur {id} generee !")
