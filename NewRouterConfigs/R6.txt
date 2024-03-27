@@ -37,3 +37,13 @@ address-family vpnv4
  neighbor 3.3.3.3 send-community both
 exit-address-family
 !
+address-family ipv4 vrf green
+neighbor 10.0.0.14 remote-as 4
+neighbor 10.0.0.14 activate
+exit-address-family
+!
+address-family ipv4 vrf red
+neighbor 10.0.0.6 remote-as 3
+neighbor 10.0.0.6 activate
+exit-address-family
+!

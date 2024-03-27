@@ -251,6 +251,28 @@ for router in routers:
         res.write("!\n")
 
 
+
+
+        for neighbor in router["adj"]:
+            if neighbor["protocol-type"]=="egp":
+                idvoisin = neighbor["neighbor"]
+                for routeurrr in routers:
+                    if routeurrr["id"]==idvoisin:
+                        asnumero = routeurrr["as"]
+                        for asss in asList:
+                            if asss["id"]==asnumero:
+                                    res.write(f"address-family ipv4 vrf {asss['color']}\n")
+                                    ip_address_voisin,ip_mask_voisin = recup_ip_masque(ip_by_links,idvoisin,(id,idvoisin))
+                                    res.write(f"neighbor {ip_address_voisin} remote-as {asnumero}\n")
+                                    res.write(f"neighbor {ip_address_voisin} activate\n")
+                                    res.write("exit-address-family\n")
+                                    res.write("!\n")
+                            
+        
+
+                
+
+
     
     
 
