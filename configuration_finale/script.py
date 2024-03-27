@@ -43,7 +43,7 @@ for router in routers:
         tn = telnetlib.Telnet(telnet_host, telnet_port, timeout=telnet_timeout)  # connexion au routeur par telnet
         tn.write(b"en\r\n")  # Envoyer une commande "Entrée" au début de la connexion -> car prompte pas encore pret
         time.sleep(0.2)  # import time
-        with open(f'./NewRouterConfigs/{router}.txt', 'r') as file:
+        with open(f'./RouterConfigs/{router}.txt', 'r') as file:
             for line in file:
                 line = line.strip()  # Supprime les espaces blancs en début et fin de ligne
                 tn.expect([b"#"])  # Attendre le prompt du routeur

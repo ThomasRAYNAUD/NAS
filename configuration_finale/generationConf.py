@@ -156,7 +156,7 @@ f = open("configuration_finale/intentFiles/intentFileTestNetwork.json", "r")
 intentFile = json.load(f)
 f.close()
 
-outputPath = "./NewRouterConfigs"
+outputPath = "RouterConfigs"
 
 #Routeurs
 routers = intentFile["routers"] 
