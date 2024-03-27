@@ -1,5 +1,6 @@
 enable
 conf t
+ip route 0.0.0.0 0.0.0.0 8.8.8.8
 interface Loopback0
  ip address 9.9.9.9 255.255.255.255
  ip ospf 10 area 0

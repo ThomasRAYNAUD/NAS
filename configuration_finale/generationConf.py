@@ -223,7 +223,11 @@ for router in routers:
         res.write(vrf(asList, constantes))
         
         
-        
+    if router_type == 'client':
+        for routerA in routers:
+            if routerA['as']==As and routerA['type']=='client_edge':
+                edge_router_id=routerA['id']
+                res.write(f'ip route 0.0.0.0 0.0.0.0 {edge_router_id}.{edge_router_id}.{edge_router_id}.{edge_router_id}\n')
 
     #Interface de Loopback
     res.write("interface Loopback0\n"
