@@ -208,7 +208,6 @@ for router in routers:
         router_type="provider"
         As_type="provider"
 
-    print(router_type)
     #Creation du fichier de configuration du routeur sous la même forme que les fichiers de configuration de GNS3
     if not os.path.exists(outputPath):
         os.makedirs(outputPath)
@@ -235,7 +234,6 @@ for router in routers:
     # configuration des interfaces en suivant les adjacences du json
     for adj in router["adj"]:
         neighbor = adj['neighbor']
-        print(neighbor)
         res.write(f"interface {adj['interface']}\n")
 
         #Récupération de l'IP et du masque
@@ -255,6 +253,7 @@ for router in routers:
         if (As_type == 'provider' and adj['protocol-type']=='igp'):
             res.write(f" mpls ip\n mpls label protocol ldp\n")
         res.write(f" no shutdown\n")
+        res.write(f" ip address {ip_address} {ip_mask}\n")
         res.write("!\n")
 
 
@@ -277,7 +276,7 @@ for router in routers:
                     res.write(f' neighbor {ip_address_voisin} activate\n')
                     # parmis tous les routeurs, si un autre customer est dans la même as que ce routeur
                     for router in routers:
-                        if router['type'] == "client" and router['as'] == As and router['id'] != id:
+                        if router['type'] == "client_edge" and router['as'] == As and router['id'] != id:
                             res.write(f' neighbor {ip_address_voisin} allowas-in\n')
                             break
                     res.write(f' exit-address-family\n')
@@ -286,8 +285,9 @@ for router in routers:
         res.write(f"!\n")
         res.write(f"interface loopback1\n")
         res.write(f" ip address {id+10}.{id+10}.{id+10}.1 255.255.255.0\n")
-        res.write(f" no shut\n")
+        res.write(f" no shutdown\n")
         res.write(f"!\n")
+
         
     res.write("!\n")
 
@@ -319,4 +319,4 @@ for router in routers:
 
     res.close()
     
-    #print(f"Configuration du routeur {id} generee !")
+    print(f"Configuration du routeur {id} generee !")
