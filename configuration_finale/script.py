@@ -41,6 +41,7 @@ for router in routers:
         telnet_host = "127.0.0.1"
         telnet_timeout = 10
         tn = telnetlib.Telnet(telnet_host, telnet_port, timeout=telnet_timeout)  # connexion au routeur par telnet
+        tn.write(b"\r\n")
         tn.write(b"en\r\n")  # Envoyer une commande "Entrée" au début de la connexion -> car prompte pas encore pret
         time.sleep(0.2)  # import time
         with open(f'./RouterConfigs/{router}.txt', 'r') as file:

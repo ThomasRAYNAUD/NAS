@@ -124,28 +124,59 @@ def as_links(router_links, as_dict, router_dict):
     return as_links_list
 
 
-def vrf(asList, constantes):
-    colors=[]
+def vrf(asList, constantes, neighbor_colors):
     string=""
-    for num_as in asList:
-        if num_as["color"] and num_as["color"] not in colors:
-            colors.append(num_as["color"])
-                
-    for color in colors :
+    # pour chaque couleur, on crée une vrf
+    
+    for color in neighbor_colors :
+        # connaitre ses voisins, pour chaque voisin dans une VRF, on rentre que la vrf (couleur) de ce voisin
+        # print les numéros de mes voisins
         string += (f"ip vrf {color}\n rd {constantes[f'route-dist-{color}']}\n"
             f" route-target export {constantes[f'route-target-{color}']}\n"
             f" route-target import {constantes[f'route-target-{color}']}\n")
-        
+            
+            
+        if color == "blue":
+            string += f" route-target import {constantes[f'route-target-red']}\n"
+            string += f" route-target import {constantes[f'route-target-green']}\n"
+        else:
+            string += f" route-target import {constantes[f'route-target-blue']}\n"
     return string
-        
 
+def get_neighbor_colors(intentFile, router_id):
 
-        
+    neighbor_colors = []
+    router_as = None
 
-            
-         
-        
-            
+    # Recherche du routeur dans la liste des routeurs
+    for router in intentFile["routers"]:
+        if router["id"] == router_id:
+            router_as = router["as"]
+            break
+
+    if not router_as:
+        return "ID de routeur invalide"
+
+    # Parcourir les voisins du routeur
+    for adj in router["adj"]:
+        neighbor_id = adj["neighbor"]
+        protocol_type = adj["protocol-type"]
+
+        # Recherche du voisin dans la liste des routeurs
+        for router in intentFile["routers"]:
+            if router["id"] == neighbor_id:
+                neighbor_as = router["as"]
+                break
+
+        # Recherche de la couleur du voisin dans la liste des AS
+        for as_info in intentFile["as"]:
+            if as_info["id"] == neighbor_as:
+                neighbor_color = as_info["color"]
+                if neighbor_color not in neighbor_colors and neighbor_color != "":
+                    neighbor_colors.append(neighbor_color)
+                break
+
+    return neighbor_colors
 
 
 #LECTURE DE L'INTENT FILE
@@ -220,7 +251,8 @@ for router in routers:
     if As_type=='provider':
         res.write('ip cef\n')
     if router_type=='provider_edge':
-        res.write(vrf(asList, constantes))
+        neighbor_colors=get_neighbor_colors(intentFile,id)
+        res.write(vrf(asList, constantes,neighbor_colors))
         
         
     if router_type == 'client':
@@ -252,9 +284,13 @@ for router in routers:
         if As_type == 'provider' and adj['protocol-type']=='egp':
             neighbor = adj['neighbor']
             neighbor_as = routers[neighbor-1]['as']
-            color = asList[neighbor_as-1]['color'] 
-            res.write(" ip vrf forwarding " + color + "\n")
-                
+            color = asList[neighbor_as-1]['color']  # Récupérer la couleur de l'AS du voisin
+            if color != "":
+                res.write(" ip vrf forwarding " + color + "\n")
+            else:
+                color = asList[neighbor_as-2]['color']
+                res.write(" ip vrf forwarding " + color + "\n")
+            # BIZARRE A DEMANDER, le routeur n'arrive pas à prendre son voisin bleu...
         if adj['protocol-type']=='igp':
             res.write(f" ip ospf {ospfProcess} area 0\n")
         if (As_type == 'provider' and adj['protocol-type']=='igp'):
@@ -317,9 +353,6 @@ for router in routers:
         res.write("exit-address-family\n")
         res.write("!\n")
 
-
-
-
         for neighbor in router["adj"]:
             if neighbor["protocol-type"]=="egp":
                 idvoisin = neighbor["neighbor"]
@@ -334,15 +367,8 @@ for router in routers:
                                     res.write(f"neighbor {ip_address_voisin} activate\n")
                                     res.write("exit-address-family\n")
                                     res.write("!\n")
-                            
-        
 
-                
-
-
-    
-    
-
+    # arreter le programme python
 
 
     res.close()
