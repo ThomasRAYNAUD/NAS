@@ -21,7 +21,7 @@ print(
     )
 )
 # Definir le projet sur lequel on veut travailler
-lab = gns3fy.Project(name="testNetwork", connector=gns3_server)
+lab = gns3fy.Project(name="Documents", connector=gns3_server)
 
 # voir si le projet existe
 lab.get()
@@ -41,9 +41,9 @@ for router in routers:
         telnet_host = "127.0.0.1"
         telnet_timeout = 10
         tn = telnetlib.Telnet(telnet_host, telnet_port, timeout=telnet_timeout)  # connexion au routeur par telnet
-        tn.write(b"\r\n")  # Envoyer une commande "Entrée" au début de la connexion -> car prompte pas encore pret
+        tn.write(b"en\r\n")  # Envoyer une commande "Entrée" au début de la connexion -> car prompte pas encore pret
         time.sleep(0.2)  # import time
-        with open(f'./configRouteurTestNetwork/{router}.txt', 'r') as file:
+        with open(f'./NewRouterConfigs/{router}.txt', 'r') as file:
             for line in file:
                 line = line.strip()  # Supprime les espaces blancs en début et fin de ligne
                 tn.expect([b"#"])  # Attendre le prompt du routeur

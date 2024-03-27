@@ -190,6 +190,7 @@ for as_dict in asLinks:
 #Constantes
 ospfProcess = str(intentFile["constantes"]["ospfPid"])
 
+
 #Ecriture de la configuration pour chaque routeur
 for router in routers:
     #Recuperation des infos du routeur
@@ -262,6 +263,7 @@ for router in routers:
     res.write(f"router ospf {ospfProcess}\n"
                 f" router-id 10.10.{id}.{id}\n")    
     
+
     if router_type=="client_edge":
         res.write(f"!\n")
         res.write(f"router bgp {As}\n")
@@ -269,25 +271,23 @@ for router in routers:
         egp_neighbors = [adj['neighbor'] for adj in router['adj'] if adj['protocol-type'] == 'egp']
         # récupe des voisins de l'egp
         for neighbor in egp_neighbors:
-            for router in routers:
-                if router['id'] == neighbor:
-                    ip_address_voisin,ip_mask = recup_ip_masque(ip_by_links,neighbor,(neighbor,id))
-                    res.write(f' neighbor {ip_address_voisin} remote-as {router["as"]}\n')
+            for router1 in routers:
+                if router1['id'] == neighbor:
+                    ip_address_voisin, ip_mask = recup_ip_masque(ip_by_links, neighbor, (neighbor, id))
+                    res.write(f' neighbor {ip_address_voisin} remote-as {router1["as"]}\n')
                     res.write(f'!\n')
                     res.write(f' address-family ipv4\n')
                     res.write(f' neighbor {ip_address_voisin} activate\n')
                     # parmis tous les routeurs, si un autre customer est dans la même as que ce routeur
-                    for router in routers:
-                        if router['type'] == "client_edge" and router['as'] == As and router['id'] != id:
+                    for router2 in routers:
+                        if router2['type'] == "client_edge" and router2['as'] == As and router2['id'] != id:
                             res.write(f' neighbor {ip_address_voisin} allowas-in\n')
                             break
                     res.write(f' exit-address-family\n')
-        res.write(f"address-family ipv4\n")
-        res.write(f" network {id+100}.{id+100}.{id+100}.0 mask 255.255.255.0\n")
-        res.write(f"!\n")
-        res.write(f"interface loopback1\n")
-        res.write(f" ip address {id+100}.{id+100}.{id+100}.1 255.255.255.0\n")
-        res.write(f" no shutdown\n")
+        res.write(f" address-family ipv4\n")
+        for [network, mask] in router['advertised_networks']:
+            res.write(f'  network {network} mask {mask}\n') 
+
         res.write(f"!\n")
 
         

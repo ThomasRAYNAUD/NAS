@@ -1,0 +1,15 @@
+enable
+conf t
+interface Loopback0
+ ip address 10.10.10.10 255.255.255.255
+ ip ospf 10 area 0
+ no shutdown
+!
+interface GigabitEthernet1/0
+ ip ospf 10 area 0
+ no shutdown
+ ip address 40.0.0.6 255.255.255.252
+!
+router ospf 10
+ router-id 10.10.10.10
+!
