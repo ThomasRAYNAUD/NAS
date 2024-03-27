@@ -282,10 +282,10 @@ for router in routers:
                             break
                     res.write(f' exit-address-family\n')
         res.write(f"address-familly ipv4\n")
-        res.write(f" network {id+10}.{id+10}.{id+10}.0 mask 255.255.255.0\n")
+        res.write(f" network {id+100}.{id+100}.{id+100}.0 mask 255.255.255.0\n")
         res.write(f"!\n")
         res.write(f"interface loopback1\n")
-        res.write(f" ip address {id+10}.{id+10}.{id+10}.1 255.255.255.0\n")
+        res.write(f" ip address {id+100}.{id+100}.{id+100}.1 255.255.255.0\n")
         res.write(f" no shutdown\n")
         res.write(f"!\n")
 
