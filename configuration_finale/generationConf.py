@@ -157,7 +157,7 @@ def vrf(constantes, neighbor_colors, color_list):
 
 #Récupération de l'intent file
 
-f = open("configuration_finale/intentFileTestNetwork.json", "r")
+f = open("configuration_finale/intentFile.json", "r")
 intentFile = json.load(f)
 f.close()
 
