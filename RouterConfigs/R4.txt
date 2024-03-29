@@ -18,7 +18,28 @@ interface GigabitEthernet2/0
  mpls ip
  mpls label protocol ldp
  no shutdown
+ ip address 10.0.0.45 255.255.255.252
+!
+interface GigabitEthernet3/0
+ ip ospf 10 area 0
+ mpls ip
+ mpls label protocol ldp
+ no shutdown
+ ip address 10.0.0.73 255.255.255.252
+!
+interface GigabitEthernet4/0
+ ip ospf 10 area 0
+ mpls ip
+ mpls label protocol ldp
+ no shutdown
  ip address 10.0.0.17 255.255.255.252
+!
+interface GigabitEthernet5/0
+ ip ospf 10 area 0
+ mpls ip
+ mpls label protocol ldp
+ no shutdown
+ ip address 10.0.0.53 255.255.255.252
 !
 router ospf 10
  router-id 10.10.4.4

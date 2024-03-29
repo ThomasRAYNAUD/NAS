@@ -1,0 +1,26 @@
+enable
+conf t
+interface Loopback0
+ ip address 19.19.19.19 255.255.255.255
+ ip ospf 10 area 0
+ no shutdown
+!
+interface GigabitEthernet1/0
+ no shutdown
+ ip address 10.0.0.70 255.255.255.252
+!
+router ospf 10
+ router-id 10.10.19.19
+!
+router bgp 4
+ bgp router-id 10.10.10.19
+ neighbor 10.0.0.69 remote-as 1
+!
+ address-family ipv4
+ neighbor 10.0.0.69 activate
+ neighbor 10.0.0.69 allowas-in
+ exit-address-family
+ address-family ipv4
+  network 40.0.0.252 mask 255.255.255.252
+!
+!

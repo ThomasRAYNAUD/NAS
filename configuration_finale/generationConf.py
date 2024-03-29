@@ -130,8 +130,8 @@ def vrf(asList, constantes, neighbor_colors):
     
     for color in neighbor_colors :
         # connaitre ses voisins, pour chaque voisin dans une VRF, on rentre que la vrf (couleur) de ce voisin
-        rd=constantes[f'route-dist-{color}'].split(':')
-        rd[1]=str(int(rd[1])+id)
+        rd=constantes[f'route-target-{color}'].split(':')
+        rd[1]=str(id)
         rd=rd[0]+':'+rd[1]
         string += (f"ip vrf {color}\n rd {rd}\n"
             f" route-target export {constantes[f'route-target-{color}']}\n"

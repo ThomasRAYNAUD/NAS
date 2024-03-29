@@ -7,7 +7,7 @@ interface Loopback0
 !
 interface GigabitEthernet1/0
  no shutdown
- ip address 10.0.0.6 255.255.255.252
+ ip address 10.0.0.42 255.255.255.252
 !
 interface GigabitEthernet2/0
  ip ospf 10 area 0
@@ -19,10 +19,10 @@ router ospf 10
 !
 router bgp 3
  bgp router-id 10.10.10.8
- neighbor 10.0.0.5 remote-as 1
+ neighbor 10.0.0.41 remote-as 1
 !
  address-family ipv4
- neighbor 10.0.0.5 activate
+ neighbor 10.0.0.41 activate
  exit-address-family
  address-family ipv4
   network 30.0.0.0 mask 255.255.255.252
