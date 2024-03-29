@@ -1,195 +1,31 @@
 import json
 import os
-import ipaddress
+from modules.ip_functions import *
+from modules.router_links_functions import *
+from modules.router_configs import *
 
-
-
-
-def recup_ip_masque(dico, id, link_tuple):
-    # Vérifier si le tuple de liens existe dans le dictionnaire
-    if link_tuple in dico:
-        # Vérifier si l'identifiant est présent dans le tuple de liens
-        if id in link_tuple:
-            # Récupérer l'adresse IP et le masque de sous-réseau associés à l'identifiant dans le tuple de liens
-            ip_index = link_tuple.index(id)
-            return dico[link_tuple][0][ip_index], dico[link_tuple][1]
-        else:
-            # Récupérer l'autre adresse IP et le masque de sous-réseau dans le tuple de liens
-            ip_index = 1 if link_tuple.index(id) == 0 else 0
-            return dico[link_tuple][0][ip_index], dico[link_tuple][1]
-    # Vérifier si le tuple inversé est présent dans le dictionnaire
-    elif link_tuple[::-1] in dico:
-        # Vérifier si l'identifiant est présent dans le tuple inversé de liens
-        if id in link_tuple[::-1]:
-            # Récupérer l'adresse IP et le masque de sous-réseau associés à l'identifiant dans le tuple inversé de liens
-            ip_index = link_tuple[::-1].index(id)
-            return dico[link_tuple[::-1]][0][ip_index], dico[link_tuple[::-1]][1]
-        else:
-            # Récupérer l'autre adresse IP et le masque de sous-réseau dans le tuple inversé de liens
-            ip_index = 1 if link_tuple[::-1].index(id) == 0 else 0
-            return dico[link_tuple[::-1]][0][ip_index], dico[link_tuple[::-1]][1]
-    else:
-        return None, None
-
-def get_subnet_mask(subnet):
-    # Convertir le sous-réseau en objet ipaddress
-    subnet_ip = ipaddress.IPv4Network(subnet)
-
-    # Obtenir le masque de sous-réseau du sous-réseau donné
-    subnet_mask = subnet_ip.netmask
-
-    return str(subnet_mask)
-
-def get_subnet_ip(subnet):
-    # Convertir le sous-réseau en objet ipaddress
-    subnet_ip = ipaddress.IPv4Network(subnet)
-
-    return str(subnet_ip.network_address)
-
-
-def get_subnet_ips(subnet):
-    # Convertir le sous-réseau en objet ipaddress
-    subnet_ip = ipaddress.IPv4Network(subnet)
-
-    # Extraire les adresses IP de ce sous-réseau
-    ips = [str(ip) for ip in subnet_ip.hosts()]
-
-    return ips
-
-def generate_subnets(network, netmask, subnet_mask):
-    # Convertir les adresses IP et les masques en objets de type ipaddress
-    network_ip = ipaddress.IPv4Network(network + '/' + str(netmask), strict=False)
-    subnet_mask = ipaddress.IPv4Network('0.0.0.0/' + str(subnet_mask), strict=False)
-
-    # Générer et afficher tous les sous-réseaux correspondant au masque de sous-réseau fourni
-    subnets = []
-    for subnet in network_ip.subnets(new_prefix=subnet_mask.prefixlen):
-        subnets.append(str(subnet))
-
-    return subnets
-
-def extract_router_links(routers):
-    links = set()
-    for router in routers:
-        router_id = router['id']
-        for neighbor in router['adj']:
-            neighbor_id = neighbor['neighbor']
-            # Ajouter le lien dans l'ensemble en s'assurant qu'il n'y a pas de doublons
-            if (router_id, neighbor_id) not in links and (neighbor_id, router_id) not in links:
-                links.add((router_id, neighbor_id))
-
-    return list(links)
-
-def as_links(router_links, as_dict, router_dict):
-    as_links_list = []
-
-    for link in router_links:
-        router1, router2 = link 
-
-        # Recherche des AS correspondant à chaque routeur
-        as_router1 = None
-        as_router2 = None
-
-        for router in router_dict:
-            if router['id'] == router1:
-                as_router1 = router['as']
-            elif router['id'] == router2:
-                as_router2 = router['as']
-
-        # Vérification si l'un des deux AS est de type provider
-        if as_router1 is not None and as_router2 is not None:
-            as_type_router1 = None
-            as_type_router2 = None
-
-            for as_info in as_dict:
-                if as_info['id'] == as_router1:
-                    as_type_router1 = as_info['type']
-                elif as_info['id'] == as_router2:
-                    as_type_router2 = as_info['type']
-
-            # Stockage dans le dictionnaire correspondant à l'AS
-            current_as = None
-            if as_type_router1 == 'provider' or as_type_router2 == 'provider':
-                current_as = as_router1 if as_type_router1 == 'provider' else as_router2
-            else:
-                current_as = as_router1
-
-            link_dict = {current_as: [link]}  # Créer un nouveau dictionnaire avec une liste contenant le lien
-
-            # Vérification si l'AS existe déjà dans la liste de dictionnaires
-            as_exists = False
-            for item in as_links_list:
-                if current_as in item:
-                    as_exists = True
-                    item[current_as].append(link)
-                    break
-
-            # Si l'AS n'existe pas encore, ajouter le nouveau dictionnaire
-            if not as_exists:
-                as_links_list.append(link_dict)
-
-    return as_links_list
-
-
-def vrf(constantes, neighbor_colors, color_list):
-    string=""
-    # pour chaque couleur, on crée une vrf
-    
-    for (neighbor_type,neighbor_color) in neighbor_colors :
-        # connaitre ses voisins, pour chaque voisin dans une VRF, on rentre que la vrf (couleur) de ce voisin
-        if neighbor_type == 'server':
-            rd=constantes[f'route-target-{neighbor_color}'].split(':')
-            rd[1]=str(id)
-            rd=rd[0]+':'+rd[1]
-            string += (f"ip vrf {neighbor_color}\n rd {rd}\n"
-                f" route-target export {constantes[f'route-target-{neighbor_color}']}\n"
-                f" route-target import {constantes[f'route-target-{neighbor_color}']}\n")
-            for (as_type,as_color) in color_list:
-                if as_type != 'server':
-                    string += f" route-target import {constantes[f'route-target-{as_color}']}\n"
-        else:
-            rd=constantes[f'route-target-{neighbor_color}'].split(':')
-            rd[1]=str(id)
-            rd=rd[0]+':'+rd[1]
-            string += (f"ip vrf {neighbor_color}\n rd {rd}\n"
-                f" route-target export {constantes[f'route-target-{neighbor_color}']}\n"
-                f" route-target import {constantes[f'route-target-{neighbor_color}']}\n")
-            for (as_type,as_color) in color_list:
-                if as_type == 'server':
-                    string += f" route-target import {constantes[f'route-target-{as_color}']}\n"
-    return string
-
-
-#LECTURE DE L'INTENT FILE
-
-#Récupération de l'intent file
-
+#Recupération de l'intentfile
 f = open("configuration_finale/intentFile.json", "r")
 intentFile = json.load(f)
 f.close()
 
+#Chemin où seront stockées les configs
 outputPath = "RouterConfigs"
 
-#Routeurs
+#Séparation de l'intentfile en sous-listes
+asList = intentFile["as"]
 routers = intentFile["routers"] 
-nbRouter = len(routers)
 constantes = intentFile["constantes"]
 
-#AS
-asList = intentFile["as"]
-nbAs = len(asList)
-
-#Tous les sous-réseaux d'un AS
-for dicAs in asList:
-    dicAs["subnets"]=generate_subnets(dicAs["network_prefix"], dicAs["network_mask"], dicAs["subnet_mask"])
-
-
-#Recuperation des liens entre les routers
+#Recuperation des liens entre les routers sous la forme [(routerA, routerB),(routerB, routerC), ... ]
 asLinks=as_links(extract_router_links(routers),asList,routers)
 
-#Generation des IP associés à chaque router
-ip_by_links={}
+#Génération de tous les sous-réseaux existants par AS
+for as_infos in asList:
+    as_infos["subnets"]=generate_subnets(as_infos["network_prefix"], as_infos["network_mask"], as_infos["subnet_mask"])
 
+#Génération des IP pour chaque lien
+ip_by_links={}
 for as_dict in asLinks:
     as_id=list(as_dict.items())[0][0]
     tuples=list(as_dict.items())[0][1]
@@ -199,10 +35,7 @@ for as_dict in asLinks:
                 subnet = as_infos['subnets'].pop(0)
                 ip_by_links[link]=(get_subnet_ips(subnet),get_subnet_mask(subnet),get_subnet_ip(subnet))
 
-
-#Constantes
-ospfProcess = str(intentFile["constantes"]["ospfPid"])
-
+#Récupération de la liste des VRF sous la forme [(type d'AS, couleur de VRF), .....]
 color_list=[]
 for as_infos in asList :
     if 'color' in as_infos:
@@ -211,6 +44,7 @@ for as_infos in asList :
 
 
 #Ecriture de la configuration pour chaque routeur
+            
 for router in routers:
     #Recuperation des infos du routeur
     id = router["id"]
@@ -228,16 +62,18 @@ for router in routers:
         router_type="provider"
         As_type="provider"
 
-    #Creation du fichier de configuration du routeur sous la même forme que les fichiers de configuration de GNS3
+    #Creation du fichier de configuration du routeur
     if not os.path.exists(outputPath):
         os.makedirs(outputPath)
     res = open(f"{outputPath}/R{id}.txt", "w")
-    # si le fichier ne s'est pas ouvert
 
+    #Début de la conf
     res.write("enable\nconf t\n")
     
     if As_type=='provider':
         res.write('ip cef\n')
+    
+    #Router de bordure => Ajout des VRF
     if router_type=='provider_edge':
         neighbor_colors=[]
 
@@ -249,48 +85,45 @@ for router in routers:
                 neighbor_as_color= asList[neighbor_as-1]['color']
                 neighbor_colors.append((neighbor_as_type,neighbor_as_color))
 
-        print(neighbor_colors)
-        res.write(vrf(constantes,neighbor_colors,color_list))
+        res.write(vrf(id, constantes,neighbor_colors,color_list))
         
-        
+    #Router client => Default Route sur le CE
     if router_type == 'client':
         for routerA in routers:
             if routerA['as']==As and routerA['type']=='client_edge':
                 edge_router_id=routerA['id']
                 res.write(f'ip route 0.0.0.0 0.0.0.0 {edge_router_id}.{edge_router_id}.{edge_router_id}.{edge_router_id}\n')
 
+
     #Interface de Loopback
     res.write("interface Loopback0\n"
               f" ip address {id}.{id}.{id}.{id} 255.255.255.255\n")
-    #ospf sur tous les routeurs
-    res.write(f" ip ospf {ospfProcess} area 0\n")
+
+
+    #OSPF
+    res.write(f" ip ospf {constantes['ospfPid']} area 0\n")
     res.write(f" no shutdown\n")
     res.write("!\n")
     
-    # configuration des interfaces en suivant les adjacences du json
+    #Config des interfaces
     for adj in router["adj"]:
         neighbor = adj['neighbor']
         res.write(f"interface {adj['interface']}\n")
 
-        #Récupération de l'IP et du masque
+        #Récupération de l'IP et du masque sur le lien
         ip_address,ip_mask = recup_ip_masque(ip_by_links,id,(id,neighbor))
 
-        # Ecrire la VRF sur les liens EGP
-      
-
-    
-        if As_type == 'provider' and adj['protocol-type']=='egp':
+        # Ecrire la VRF sur les liens EGP   
+        if router_type == 'provider_edge' and adj['protocol-type']=='egp':
             neighbor = adj['neighbor']
             neighbor_as = routers[neighbor-1]['as']
-            color = asList[neighbor_as-1]['color']  # Récupérer la couleur de l'AS du voisin
-            if color != "":
-                res.write(" ip vrf forwarding " + color + "\n")
-            else:
-                color = asList[neighbor_as-2]['color']
-                res.write(" ip vrf forwarding " + color + "\n")
-            # BIZARRE A DEMANDER, le routeur n'arrive pas à prendre son voisin bleu...
+
+            if 'color' in asList[neighbor_as-1]:
+                res.write(" ip vrf forwarding " + asList[neighbor_as-1]['color'] + "\n")
+
+        
         if adj['protocol-type']=='igp':
-            res.write(f" ip ospf {ospfProcess} area 0\n")
+            res.write(f" ip ospf {constantes['ospfPid']} area 0\n")
         if (As_type == 'provider' and adj['protocol-type']=='igp'):
             res.write(f" mpls ip\n mpls label protocol ldp\n")
         res.write(f" no shutdown\n")
@@ -298,7 +131,7 @@ for router in routers:
         res.write("!\n")
 
 
-    res.write(f"router ospf {ospfProcess}\n"
+    res.write(f"router ospf {constantes['ospfPid']}\n"
                 f" router-id 10.10.{id}.{id}\n")    
     
     for (routerA, routerB) in list(ip_by_links.keys()):
