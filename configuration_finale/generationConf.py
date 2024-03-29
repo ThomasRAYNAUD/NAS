@@ -40,6 +40,13 @@ def get_subnet_mask(subnet):
 
     return str(subnet_mask)
 
+def get_subnet_ip(subnet):
+    # Convertir le sous-réseau en objet ipaddress
+    subnet_ip = ipaddress.IPv4Network(subnet)
+
+    return str(subnet_ip.network_address)
+
+
 def get_subnet_ips(subnet):
     # Convertir le sous-réseau en objet ipaddress
     subnet_ip = ipaddress.IPv4Network(subnet)
@@ -190,7 +197,7 @@ for as_dict in asLinks:
         for as_infos in asList:
             if as_infos['id']==as_id:
                 subnet = as_infos['subnets'].pop(0)
-                ip_by_links[link]=(get_subnet_ips(subnet),get_subnet_mask(subnet))
+                ip_by_links[link]=(get_subnet_ips(subnet),get_subnet_mask(subnet),get_subnet_ip(subnet))
 
 
 #Constantes
@@ -295,6 +302,11 @@ for router in routers:
     res.write(f"router ospf {ospfProcess}\n"
                 f" router-id 10.10.{id}.{id}\n")    
     
+    for (routerA, routerB) in list(ip_by_links.keys()):
+        if routerA == id or routerB == id:
+            print (ip_by_links[(routerA, routerB)][2])
+            print (ip_by_links[(routerA, routerB)][1])
+
 
     if router_type=="client_edge":
         res.write(f"!\n")
