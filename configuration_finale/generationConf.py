@@ -209,7 +209,6 @@ for as_infos in asList :
         if not ( (as_infos['type'], as_infos['color']) in color_list ): 
             color_list.append((as_infos['type'], as_infos['color']))
 
-print(color_list)
 
 #Ecriture de la configuration pour chaque routeur
 for router in routers:
