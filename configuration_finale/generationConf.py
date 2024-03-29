@@ -124,68 +124,40 @@ def as_links(router_links, as_dict, router_dict):
     return as_links_list
 
 
-def vrf(asList, constantes, neighbor_colors):
+def vrf(constantes, neighbor_colors, color_list):
     string=""
     # pour chaque couleur, on crée une vrf
     
-    for color in neighbor_colors :
+    for (neighbor_type,neighbor_color) in neighbor_colors :
         # connaitre ses voisins, pour chaque voisin dans une VRF, on rentre que la vrf (couleur) de ce voisin
-        rd=constantes[f'route-target-{color}'].split(':')
-        rd[1]=str(id)
-        rd=rd[0]+':'+rd[1]
-        string += (f"ip vrf {color}\n rd {rd}\n"
-            f" route-target export {constantes[f'route-target-{color}']}\n"
-            f" route-target import {constantes[f'route-target-{color}']}\n")
-            
-            
-        if color == "blue":
-            string += f" route-target import {constantes[f'route-target-red']}\n"
-            string += f" route-target import {constantes[f'route-target-green']}\n"
+        if neighbor_type == 'server':
+            rd=constantes[f'route-target-{neighbor_color}'].split(':')
+            rd[1]=str(id)
+            rd=rd[0]+':'+rd[1]
+            string += (f"ip vrf {neighbor_color}\n rd {rd}\n"
+                f" route-target export {constantes[f'route-target-{neighbor_color}']}\n"
+                f" route-target import {constantes[f'route-target-{neighbor_color}']}\n")
+            for (as_type,as_color) in color_list:
+                if as_type != 'server':
+                    string += f" route-target import {constantes[f'route-target-{as_color}']}\n"
         else:
-            string += f" route-target import {constantes[f'route-target-blue']}\n"
+            rd=constantes[f'route-target-{neighbor_color}'].split(':')
+            rd[1]=str(id)
+            rd=rd[0]+':'+rd[1]
+            string += (f"ip vrf {neighbor_color}\n rd {rd}\n"
+                f" route-target export {constantes[f'route-target-{neighbor_color}']}\n"
+                f" route-target import {constantes[f'route-target-{neighbor_color}']}\n")
+            for (as_type,as_color) in color_list:
+                if as_type == 'server':
+                    string += f" route-target import {constantes[f'route-target-{as_color}']}\n"
     return string
-
-def get_neighbor_colors(intentFile, router_id):
-
-    neighbor_colors = []
-    router_as = None
-
-    # Recherche du routeur dans la liste des routeurs
-    for router in intentFile["routers"]:
-        if router["id"] == router_id:
-            router_as = router["as"]
-            break
-
-    if not router_as:
-        return "ID de routeur invalide"
-
-    # Parcourir les voisins du routeur
-    for adj in router["adj"]:
-        neighbor_id = adj["neighbor"]
-        protocol_type = adj["protocol-type"]
-
-        # Recherche du voisin dans la liste des routeurs
-        for router in intentFile["routers"]:
-            if router["id"] == neighbor_id:
-                neighbor_as = router["as"]
-                break
-
-        # Recherche de la couleur du voisin dans la liste des AS
-        for as_info in intentFile["as"]:
-            if as_info["id"] == neighbor_as:
-                neighbor_color = as_info["color"]
-                if neighbor_color not in neighbor_colors and neighbor_color != "":
-                    neighbor_colors.append(neighbor_color)
-                break
-
-    return neighbor_colors
 
 
 #LECTURE DE L'INTENT FILE
 
 #Récupération de l'intent file
 
-f = open("configuration_finale/intentFiles/intentFileTestNetwork.json", "r")
+f = open("configuration_finale/intentFileTestNetwork.json", "r")
 intentFile = json.load(f)
 f.close()
 
@@ -220,9 +192,17 @@ for as_dict in asLinks:
                 subnet = as_infos['subnets'].pop(0)
                 ip_by_links[link]=(get_subnet_ips(subnet),get_subnet_mask(subnet))
 
+
 #Constantes
 ospfProcess = str(intentFile["constantes"]["ospfPid"])
 
+color_list=[]
+for as_infos in asList :
+    if 'color' in as_infos:
+        if not ( (as_infos['type'], as_infos['color']) in color_list ): 
+            color_list.append((as_infos['type'], as_infos['color']))
+
+print(color_list)
 
 #Ecriture de la configuration pour chaque routeur
 for router in routers:
@@ -253,8 +233,18 @@ for router in routers:
     if As_type=='provider':
         res.write('ip cef\n')
     if router_type=='provider_edge':
-        neighbor_colors=get_neighbor_colors(intentFile,id)
-        res.write(vrf(asList, constantes,neighbor_colors))
+        neighbor_colors=[]
+
+        for adj in router["adj"]:
+            neighbor_id = adj["neighbor"]
+            neighbor_as = routers[neighbor_id-1]['as']
+            if 'color' in asList[neighbor_as-1]:
+                neighbor_as_type = asList[neighbor_as-1]['type']
+                neighbor_as_color= asList[neighbor_as-1]['color']
+                neighbor_colors.append((neighbor_as_type,neighbor_as_color))
+
+        print(neighbor_colors)
+        res.write(vrf(constantes,neighbor_colors,color_list))
         
         
     if router_type == 'client':

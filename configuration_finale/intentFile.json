@@ -12,8 +12,7 @@
             "network_prefix": "10.0.0.0",
             "network_mask":"255.255.255.0",
             "subnet_mask":"255.255.255.252",
-            "type":"provider",
-            "color":""
+            "type":"provider"
         },
         {
             "id":2,
@@ -44,7 +43,7 @@
             "network_prefix": "60.0.0.0",
             "network_mask":"255.255.255.0",
             "subnet_mask":"255.255.255.252",
-            "type":"client",
+            "type":"server",
             "color":"blue"
         }
     ],
