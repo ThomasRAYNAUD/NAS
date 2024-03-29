@@ -342,7 +342,7 @@
     {
         "id":16,
         "as":1,
-        "type":"provider",
+        "type":"route-reflector",
         "adj":[
             {
                 "neighbor":15,
