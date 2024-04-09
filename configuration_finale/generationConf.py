@@ -59,8 +59,12 @@ for as_infos in asList :
 
 
 #Ecriture de la configuration pour chaque routeur
-            
-            
+reflector_list=[]
+for routerbis in routers:
+    if routerbis["type"]=="route-reflector":
+        # met id dans un list "reflector_list"
+        reflector_list.append(routerbis["id"])
+
 for router in routers:
 
 
@@ -83,6 +87,9 @@ for router in routers:
     elif router["type"]=="provider":
         router_type="provider"
         As_type="provider"
+    elif router["type"]=="route-reflector":
+        router_type="route-reflector"
+        As_type="route-reflector"
 
 
     ######################################################################################
@@ -102,7 +109,7 @@ for router in routers:
     #Début de la conf
     res.write("enable\nconf t\n")
     
-    if As_type=='provider':
+    if As_type=='provider' or As_type=='route-reflector':
         res.write('ip cef\n')
     
     #Router de bordure => Ajout des VRF
@@ -119,7 +126,6 @@ for router in routers:
                 neighbor_as_color= asList[neighbor_as-1]['color']
                 neighbor_colors.append((neighbor_as_type,neighbor_as_color))
 
-        res.write(vrf(id, constantes,neighbor_colors,color_list))
         res.write(vrf(id, constantes,neighbor_colors,color_list))
         
     #Router client => Default Route sur le CE
@@ -148,8 +154,6 @@ for router in routers:
     res.write(f" ip ospf {constantes['ospfPid']} area 0\n")
     res.write(f" no shutdown\n")
     res.write("!\n")
-    
-
 
     ######################################################################################
     ##                             Conf des interfaces                                  ##
@@ -176,15 +180,13 @@ for router in routers:
             res.write(f" ip ospf {constantes['ospfPid']} area 0\n")
 
         #Activer MPLS sur tous les liens IGP des provider
-        if (As_type == 'provider' and adj['protocol-type']=='igp'):
+        if ((As_type == 'provider' or As_type =='route-reflector') and adj['protocol-type']=='igp'):
             res.write(f" mpls ip\n mpls label protocol ldp\n")
 
         
         res.write(f" no shutdown\n")
         res.write(f" ip address {ip_address} {ip_mask}\n")
         res.write("!\n")
-
-
 
     ######################################################################################
     ##                             Configuration BGP                                    ##
@@ -193,11 +195,12 @@ for router in routers:
     if router_type=="client_edge":
         res.write(bgp_client_edge(router,As,id,routers,ip_by_links))
 
-
     #Provider Edge :
     if router_type == "provider_edge":
-        res.write(bgp_provider_edge(router,As,id,routers,ip_by_links,asList))
-
+        res.write(bgp_provider_edge(router,As,id,routers,ip_by_links,asList,reflector_list))
+    
+    if router_type == "route-reflector":
+        res.write(bgp_route_reflector(router,As,id,routers,ip_by_links,asList,reflector_list))
 
     res.close()
     

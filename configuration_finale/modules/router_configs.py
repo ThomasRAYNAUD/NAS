@@ -2,32 +2,18 @@ from modules.ip_functions import recup_ip_masque
 
 def vrf(id, constantes, neighbor_colors, color_list):
     config = ""
-
     for (neighbor_type, neighbor_color) in neighbor_colors:
-        if neighbor_type == 'server':
-            rd = constantes[f'route-target-{neighbor_color}'].split(':')
-            rd[1] = str(id)
-            rd = rd[0] + ':' + rd[1]
-            config += (
-                f"ip vrf {neighbor_color}\n rd {rd}\n"
-                f" route-target export {constantes[f'route-target-{neighbor_color}']}\n"
-                f" route-target import {constantes[f'route-target-{neighbor_color}']}\n"
-            )
-            for (as_type, as_color) in color_list:
-                if as_type != 'server':
-                    config += f" route-target import {constantes[f'route-target-{as_color}']}\n"
-        else:
-            rd = constantes[f'route-target-{neighbor_color}'].split(':')
-            rd[1] = str(id)
-            rd = rd[0] + ':' + rd[1]
-            config += (
-                f"ip vrf {neighbor_color}\n rd {rd}\n"
-                f" route-target export {constantes[f'route-target-{neighbor_color}']}\n"
-                f" route-target import {constantes[f'route-target-{neighbor_color}']}\n"
-            )
-            for (as_type, as_color) in color_list:
-                if as_type == 'server':
-                    config += f" route-target import {constantes[f'route-target-{as_color}']}\n"
+        rd = constantes[f'route-target-{neighbor_color}'].split(':')
+        rd[1] = str(id)
+        rd = rd[0] + ':' + rd[1]
+        config += (
+            f"ip vrf {neighbor_color}\n rd {rd}\n"
+            f" route-target export {constantes[f'route-target-{neighbor_color}']}\n"
+            f" route-target import {constantes[f'route-target-{neighbor_color}']}\n"
+        )
+        for (as_type, as_color) in color_list:
+            if as_type == 'server':
+                config += f" route-target import {constantes[f'route-target-{as_color}']}\n"
     return config
 
 def bgp_client_edge(router, As, id, routers, ip_by_links):
@@ -60,27 +46,25 @@ def bgp_client_edge(router, As, id, routers, ip_by_links):
     config += "!\n"
     return config
 
-def bgp_provider_edge(router, As, id, routers, ip_by_links, asList):
+def bgp_provider_edge(router, As, id, routers, ip_by_links, asList,reflector_list):
     config = ""
     config += f"router bgp {As}\n"
     config += f" bgp router-id 10.10.10.{id}\n"
-    config += "bgp log-neighbor-changes\n"
+    config += " bgp log-neighbor-changes\n"
 
-    for routeur in routers:
-        if routeur["as"] == As and routeur["type"] == "provider_edge" and routeur["id"] != id:
+    for ids in reflector_list:
             config += (
-                f" neighbor {routeur['id']}.{routeur['id']}.{routeur['id']}.{routeur['id']} remote-as {As}\n"
-                f" neighbor {routeur['id']}.{routeur['id']}.{routeur['id']}.{routeur['id']} update-source Loopback0\n"
+                f" neighbor {ids}.{ids}.{ids}.{ids} remote-as {As}\n"
+                f" neighbor {ids}.{ids}.{ids}.{ids} update-source Loopback0\n"
             )
 
     config += "!\n"
     config += "address-family vpnv4\n"
 
-    for routeur in routers:
-        if routeur["as"] == As and routeur["type"] == "provider_edge" and routeur["id"] != id:
+    for idss in reflector_list:
             config += (
-                f" neighbor {routeur['id']}.{routeur['id']}.{routeur['id']}.{routeur['id']} activate\n"
-                f" neighbor {routeur['id']}.{routeur['id']}.{routeur['id']}.{routeur['id']} send-community both\n"
+                f" neighbor {idss}.{idss}.{idss}.{idss} activate\n"
+                f" neighbor {idss}.{idss}.{idss}.{idss} send-community both\n"
             )
 
     config += "exit-address-family\n"
@@ -102,4 +86,48 @@ def bgp_provider_edge(router, As, id, routers, ip_by_links, asList):
                                 "exit-address-family\n"
                                 "!\n"
                             )
+    return config
+
+def bgp_route_reflector(router,As,id,routers,ip_by_links,asList,reflector_list):
+    config = ""
+    config += f"router bgp {As}\n"
+    config += f" bgp router-id 10.10.10.{id}\n"
+    config += " bgp log-neighbor-changes\n"
+    for ids in reflector_list:
+        if ids != id:
+            config += (
+                f" neighbor {ids}.{ids}.{ids}.{ids} remote-as {As}\n"
+                f" neighbor {ids}.{ids}.{ids}.{ids} update-source Loopback0\n"
+            )
+
+    config += "!\n"
+    config += "address-family vpnv4\n"
+
+    for ids in reflector_list:
+        if ids != id:
+            config += (
+                f" neighbor {ids}.{ids}.{ids}.{ids} activate\n"
+                f" neighbor {ids}.{ids}.{ids}.{ids} send-community both\n"
+            )
+
+    
+
+    config += "exit-address-family\n"
+    config += "!\n"
+    for router3 in routers:
+        
+        if router3["type"] == "provider_edge" and As == router3["as"] and router3["id"] != id and router3["id"] not in reflector_list:
+            ids = router3["id"]
+            Ass = router3["as"]
+            config += (
+                f"neighbor {ids}.{ids}.{ids}.{ids} remote-as {Ass}\n"
+                f" neighbor {ids}.{ids}.{ids}.{ids} update-source Loopback0\n"
+                f"neighbor {ids}.{ids}.{ids}.{ids} route-reflector-client\n"
+                f"address-family vpnv4\n"
+                f" neighbor {ids}.{ids}.{ids}.{ids} activate\n"
+                f" neighbor {ids}.{ids}.{ids}.{ids} send-community both\n"
+                f" neighbor {ids}.{ids}.{ids}.{ids} route-reflector-client\n"
+                f"exit-address-family\n"
+                "!\n"
+            )
     return config
