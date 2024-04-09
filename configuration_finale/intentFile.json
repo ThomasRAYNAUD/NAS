@@ -52,7 +52,7 @@
         "id":1,
         "type":"client_edge",
         "as":4,
-        "advertised_networks":[["40.0.0.0","255.255.255.252"]],
+        "advertised_networks":[["40.0.0.4","255.255.255.252"]],
         "adj":[
             {
                 "neighbor":3,
@@ -201,7 +201,7 @@
     {
         "id":7,
         "as":4,
-        "advertised_networks":[["40.0.0.4","255.255.255.252"]],
+        "advertised_networks":[["40.0.0.0","255.255.255.252"]],
         "type":"client_edge",
         "adj":[
             {

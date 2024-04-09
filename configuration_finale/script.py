@@ -21,7 +21,7 @@ print(
     )
 )
 # Definir le projet sur lequel on veut travailler
-lab = gns3fy.Project(name="Documents", connector=gns3_server)
+lab = gns3fy.Project(name="GNS3BONUS", connector=gns3_server)
 
 # voir si le projet existe
 lab.get()
