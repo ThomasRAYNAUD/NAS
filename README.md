@@ -14,7 +14,7 @@ We start by setting a network consisting of 4 routers, as shown in Figure 1 : 2 
 We are gonna be setting MPLS and **LDP** to route data packets using labels. This will be useful later when we add Clients, since our final objective is to automate the provisioning of BGP/MPLS VPN services, in the example of Internet Services. 
 
 
-#### Automation
+### Automation
 
 Our main objective is to automate the whole configuration process In order to do so, we need to create a code that allows us to manipulate the consoles of each router in the GNS3 project from distance. We decided to use the **telnet** protocol, which allows us to establish TCP/IP connexions and access a distant machine. We will be working on the basis of our existing code for the GNS Project we did earlier this year. 
 
