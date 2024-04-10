@@ -140,9 +140,12 @@ Before moving on, we make sure that routes appear at the right place and that th
 
 Ultimately and as add-ins, we decided to implement some other caracteristics to our code.
 
-#### Tunnel RSVP
 
 #### Route reflector
+
+We implemented the route reflector functionnality. This allows us to gain in rapidity in our network by placing an additional router in the network, called the "route reflector". Instead of the routers establishing BGP sessions with every other router, they are gonna establish its BGP session with the route reflector. The route reflector's task is then to distribute every routing table to the different routers, acting like some sort of hub that frees space in the network. 
+
+In order to configure this setup, we need to configure "route reflector clients", these being the routers that are gonna be connected to the route reflector via BGP. The next step is to configure our PE routers so that they communicate only to the route reflector.
 
 ## How to run
 
